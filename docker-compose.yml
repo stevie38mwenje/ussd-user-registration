@@ -1,0 +1,33 @@
+version: '3'
+services:
+  postgres:
+    container_name: ussd
+    image: postgres:10.5
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=ussd
+    logging:
+      options:
+        max-size: 10m
+        max-file: "3"
+    ports:
+      - '5435:5432'
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
+      # copy the sql script to create tables
+      #- ./sql/create_tables.sql:/docker-entrypoint-initdb.d/create_tables.sql
+  ngrok:
+    image: shkoliar/ngrok:latest
+    ports:
+      - 4551:4551
+    links:
+      - web
+    environment:
+      - PARAMS=http -region=eu -authtoken=2ByvxCL8DIadNNjzKoiGstBLHh3_5TjEcSatdJFsEYz6NMKBu localdev.docker:80
+    networks:
+      dev_net:
+        ipv4_address: 10.5.0.10
+volumes:
+  postgres:
